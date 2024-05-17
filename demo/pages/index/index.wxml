@@ -1,0 +1,27 @@
+<!-- index.wxml -->
+<view class="page-container">
+  <view class="header">{{appName}}</view>
+  <view class="version">v1</view>
+  <view class="user-info">
+    <view>姓名:{{userInfo.name}}</view>
+    <view>年纪:{{userInfo.age}}</view>
+  </view>
+  <view class="version">v2</view>
+  <view class="user-info">
+    <view>姓名:{{userInfo2.name}}</view>
+    <view>年纪:{{userInfo2.age}}</view>
+  </view>
+  <view class="section-title">水果{{goodList.length}}</view>
+  <view class="fruit-list">
+    <scroll-view scroll-y style="width:750rpx;height:130rpx;border:1rpx solid #666;">
+      <view wx:for="{{goodList}}" class="fruit-item">{{item.name}}</view>
+    </scroll-view>
+  </view>
+  <view class="button-group">
+    <button class="action-button" bind:tap="goDetail">个人详情页</button>
+    <button class="action-button" bind:tap="changeProjectName">更改项目名称</button>
+    <button class="action-button" bind:tap="requestMoreFruits">请求更多水果</button>
+    <button class="action-button" bind:tap="changeUserInfo">userInfo-->{name:"王五",age:"25"}</button>
+    <button class="action-button" bind:tap="testGetter">getter缓存看打印</button>
+  </view>
+</view>
