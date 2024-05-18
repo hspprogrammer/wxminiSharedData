@@ -128,11 +128,11 @@ let y = null;
 
 function g(t, e) {
   const o = () => {
-    m(o), y = o, d.push(o), e && e.scheduler ? e.scheduler(t) : t(), d.pop(), y = d[d.length - 1]
+    m(o), y = o, d.push(o), t(), d.pop(), y = d[d.length - 1]
   };
   o.options = e || {}, o.deps = [];
   let n = h.get(this);
-  n || this && h.set(this, n = []), n && n.push(o), o()
+  n || this && h.set(this, n = []), n && n.push(o), e && e.scheduler ? e.scheduler(o) : o()
 }
 
 function m(t) {

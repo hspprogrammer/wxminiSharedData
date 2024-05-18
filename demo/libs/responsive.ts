@@ -33,11 +33,7 @@ export function effect(fn: Function, options?: EffectOptions) {
     cleanup(effectFn)
     activeEffect = effectFn;
     effectStack.push(effectFn);
-    if (options && options.scheduler) {
-      options.scheduler(fn)
-    } else {
-      fn();
-    }
+    fn();
     effectStack.pop();
     activeEffect = effectStack[effectStack.length - 1];
   }
@@ -49,7 +45,13 @@ export function effect(fn: Function, options?: EffectOptions) {
     this && pageEffectMap.set(this, (pageEffects = []))
   }
   pageEffects && pageEffects.push(effectFn);
-  effectFn();
+
+  if (options && options.scheduler) {
+    options.scheduler(
+      effectFn)
+  } else {
+    effectFn();
+  }
 }
 
 function cleanup(effectFn) {
@@ -226,7 +228,6 @@ export function trigger(target: object, key: string | symbol, type: TriggerType,
     });
   }
   effectToRun && effectToRun.forEach(effectFn => {
-    console.log(effectFn.options)
     if (effectFn.options?.scheduler) {
       effectFn.options.scheduler(effectFn)
     } else {
