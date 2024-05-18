@@ -21,6 +21,7 @@
     - [storeCommit](#api-3)
     - [getStoreData](#api-4)
     - [storeGetters](#api-5)
+    - [storeDispatch](#api-6)
 - [总结及建议](#end)
 - [更新日志](#log)
 
@@ -190,6 +191,10 @@ this.setData({
 ```js
 console.log(this.$storeGetters("getAppName"));
 ```
+
+#### <div id="api-6">storeDispatch</div>
+
+调用 store 的 actions 异步函数
 
 ## <div id="end">总结和建议</div>
 
