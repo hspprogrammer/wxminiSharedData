@@ -1,6 +1,6 @@
 export interface ActiveEffect {
   (...args: any[]): any;
-  deps: Set<ActiveEffect>
+  deps: Array<ActiveEffect>
   options: EffectOptions
 }
 

@@ -6,7 +6,7 @@ module.exports = {
   experiments: {
     outputModule: true,
   },
-  entry: './src/index.js',
+  entry: './src/index.ts',
   output: {
     filename: pkg.main,
     library: {
@@ -28,6 +28,10 @@ module.exports = {
           "plugins": ["@babel/plugin-external-helpers"]
         },
       },
+    }, {
+      test: /\.tsx?$/,
+      use: 'ts-loader',
+      exclude: /(node_modules|demo)/,
     }, ]
   }
 };

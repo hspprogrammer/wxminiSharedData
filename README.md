@@ -8,20 +8,21 @@
 - 全局状态 data 支持所有 Page 和 Component。
 - 类似 Vuex 的使用
 - 适合原生小程序，即使后期引入，也只需增加几行代码。
-- 目前为第一版，很粗糙，但也可以满足一般的共享状态需求
-
-## 更新日志
-
-### 1.0.0
-
-\[2024.5.13\] : 1.0.0
+- 支持 Store 模块化配置
 
 ### 导航
 
 - [全局状态开始](#start)
   - [安装及引入](#start-1)
   - [使用方式](#start-2)
+  - [API](#api)
+    - [setStoreToPage](#api-1)
+    - [effect](#api-2)
+    - [storeCommit](#api-3)
+    - [getStoreData](#api-4)
+    - [storeGetters](#api-5)
 - [总结及建议](#end)
+- [更新日志](#log)
 
 ## <div id="start">开始</div>
 
@@ -59,16 +60,24 @@ import Store from "你存放index.js的路径";
 
 #### 初始化
 
-首先声明 Store 的实例，这里使用了单例，所以最好不要实例化多次，因为后面实例化的参数不会处理。
-
 ```js
 // /store/index.js中 例如
 import Store from "wxminishareddata"; //直接引用的话 替换成import Store from "你存放index.js的路径";
+import goods from "./modules/goods";
 
 export default new Store({
+  modules: {
+    goods,
+  },
   data: {
     appName: "实例项目",
     userInfo: {},
+  },
+  getters: {
+    getAppName: (data: { appName: string }) => {
+      console.log("getter执行了");
+      return "我的名字" + data.appName;
+    },
   },
   mutations: {
     setAppName(data, val) {
@@ -81,6 +90,7 @@ export default new Store({
   actions: {
     async getUserInfo({ storeCommit }) {
       setTimeout(() => {
+        console.log("dispatch获取用户信息");
         storeCommit("setUserInfo", {
           name: "张三",
           age: 18,
@@ -100,30 +110,60 @@ export default new Store({
 ```js
 // app.js 中
 import "./store/index";
-import { storeDispatch, storeCommit } from "wxminishareddata"; //这里是模拟一进入小程序就请求用户信息
 App({
-  onLaunch() {
-    storeDispatch("getUserInfo");
-    // storeCommit("setUserInfo",{
-    //   name:"李四",
-    //   age:20
-    // })
-  },
+  onLaunch() {},
 });
 ```
 
-#### 页面或者组件中使用
+### <div id="api">3.常用 Api</div>
 
-在页面或者组件中，可以 this.$setStoreToPage 方法将全局中的数据加载到页面或者组件的 data 中，其中 key 为在页面或组件 data 的 key,值为字符串，对应 store 里 data 的的 key，目前不支持使用"userInfo.name"这种形式取值。后续版本会完善。
+以下的 api 都是可以在 Page 或者 Component 中以 this.$xxx 的形式调用的，如果要在其他地方使用，请直接从包中引用。
+
+#### <div id="api-1">setStoreToPage</div>
+
+1.0 版本中使用的 api，主要作用是将 Store 里的数据加载到页面或者组件的 data 中，并在全局建立起 Page 或者 Component 与 Store 的对应关系，在 Store 发生改变时，取出 Page 或者 Component，直接调用 setData 触发页面更新。如下
 
 ```js
-this.$setStoreToPage({
-  appName: "appName",
-  userInfo: "userInfo",
-});
+...
+onLoad(){
+  this.$setStoreToPage({
+    appName: "appName",
+    userInfo: "userInfo",
+  });
+}
+...
 ```
 
-如果要修改全局状态，请使用 this.$storeCommit(key,value)调用 store 里 mutations 中定义的方法，具体使用方法如下，这里我们重新设置了全局中 userInfo 的值，设置完会自动更新所有使用到 userInfo 的页面。
+key 对应的是页面 data 里的 key,value 对应的是 Store 里的数据。
+
+#### <div id="api-2">effect</div>
+
+2.0 版本中生成全局状态的副作用函数，使用方法如下
+
+```js
+this.$effect(
+  () => {
+    console.log("detail");
+    this.setData({
+      userInfo: this.$getStoreData().userInfo,
+    });
+  },
+  {
+    scheduler: (fn) => {
+      console.log("打印调度器,延迟1秒执行");
+      setTimeout(() => {
+        fn();
+      }, 1000);
+    },
+  }
+);
+```
+
+effect 函数有两个参数,第一个参数是一个回调函数，第二个函数是一个对象，可传入 scheduler，用于自己控制 effect 函数的执行。
+
+#### <div id="api-3">storeCommit</div>
+
+用于触发 Store 里的 mutations，以便更新 Store 的 data。第一个参数是"模块名/mutations 名",主模块的模块名默认为"",调用直接调用"mutations 名",其他模块的模块名可使用 name 定义，如果未定义则使用在主模块 modules 里的 key。除使用 getStoreData 获取全局状态是通过对象调用，其他 api 的调用都适用这个。第二个参数可以传递任意参数。
 
 ```js
 this.$storeCommit("setUserInfo", {
@@ -132,14 +172,37 @@ this.$storeCommit("setUserInfo", {
 });
 ```
 
-调用全局的异步方法 使用 this.$storeDispatch(name,...val),name 为 actions 里的方法名，传参依次传入。
+#### <div id="api-4">getStoreData</div>
+
+获取 Store 的 data 引用，建议只使用这个 api 获取 store，而不要直接更改 store，如果要更改，请使用 storeCommit 更改。
 
 ```js
-this.$storeDispatch("getUserInfo");
+this.setData({
+  userInfo2: this.$getStoreData().userInfo,
+  goodList: this.$getStoreData().goods.goodList,
+});
+```
+
+#### <div id="api-5">storeGetters</div>
+
+可以在 Store 里定义 getter,getter 会缓存计算的结果，如果依赖的 store 没有变化，只会返回之前计算的结果。
+
+```js
+console.log(this.$storeGetters("getAppName"));
 ```
 
 ## <div id="end">总结和建议</div>
 
-最近也是在写原生微信小程序中使用 storage 共享状态时，维护和更新不同页面需要太多的精力去做，所以花了一下午写了这个非常粗糙的方案。后续打算借鉴 Vue3 的响应式，重新实现。
+最近也是在写原生微信小程序中使用 storage 共享状态时，维护和更新不同页面需要太多的精力去做，所以花了一下午写了这个非常粗糙的方案。因为在看《Vue.js 设计与实现》，所以边看边按照书上实现了个在插件中响应式，主要困难是 Vue 的响应式都是单文件的，所以它不用担心页面销毁后的副作用函数还存在的问题，但在这里，响应式是全局存在的，并不会因为页面或组件的销毁而销毁，所以我在页面销毁前清除了当前页面所有 effect。
 
 大家有使用上的问题或者想法可以发邮件给我 [联系我](hspprogrammer@163.com) hspprogrammer@163.com 最后欢迎来我的 [github](https://github.com/hspprogrammer/wxminiSharedData#readme) 点个小星星
+
+## <div id="log">更新日志</div>
+
+### 2.0.0
+
+\[2024.5.13\] : 引入响应式，支持 getter 缓存,模块化配置
+
+### 1.0.0
+
+\[2024.5.13\] : 主要利用发布订阅，粗暴实现。

@@ -33,18 +33,22 @@ export function effect(fn: Function, options?: EffectOptions) {
     cleanup(effectFn)
     activeEffect = effectFn;
     effectStack.push(effectFn);
-    fn();
+    if (options && options.scheduler) {
+      options.scheduler(fn)
+    } else {
+      fn();
+    }
     effectStack.pop();
     activeEffect = effectStack[effectStack.length - 1];
   }
   effectFn.options = options || {};
-  effectFn.deps = new Set();
+  effectFn.deps = [];
 
-  let pageEffects: Set<ActiveEffect> = pageEffectMap.get(this);
+  let pageEffects: Array<ActiveEffect> = pageEffectMap.get(this);
   if (!pageEffects) {
-    this && pageEffectMap.set(this, (pageEffects = new Set()))
+    this && pageEffectMap.set(this, (pageEffects = []))
   }
-  pageEffects && pageEffects.add(effectFn);
+  pageEffects && pageEffects.push(effectFn);
   effectFn();
 }
 
@@ -57,10 +61,11 @@ function cleanup(effectFn) {
 }
 
 export function destroyDep() {
-  let pageEffects: Set<ActiveEffect> = new Set(pageEffectMap.get(this) || []);
-  for (const effectFn of pageEffects) {
-    cleanup(effectFn)
+  let pageEffects: Array<ActiveEffect> = pageEffectMap.get(this);
+  for (let i = 0; i < pageEffects.length; i++) {
+    cleanup(pageEffects[i])
   }
+  pageEffects.length = 0
 }
 
 export function createReactive(data, isShallow = false) {
@@ -166,7 +171,7 @@ export function collect(target, key) {
   }
   // 将副作用函数添加进去
   deps.add(activeEffect);
-  activeEffect.deps.add(deps);
+  activeEffect.deps.push(deps);
 }
 
 export function trigger(target: object, key: string | symbol, type: TriggerType, newVal?) {

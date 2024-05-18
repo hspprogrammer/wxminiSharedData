@@ -4,7 +4,10 @@ import "./store/index"
 // } from "wxminishareddata"
 import {
   storeDispatch
-} from "./libs/index";
+} from "./libs/test";
+// import {
+//   storeDispatch
+// } from "./libs/index";
 App({
   onLaunch() {
     storeDispatch("getUserInfo");
