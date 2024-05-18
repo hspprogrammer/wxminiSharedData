@@ -1,6 +1,4 @@
-// import Store from "wxminishareddata";
-// import Store from "../libs/index";
-import Store from "../libs/test";
+import Store from "wxminishareddata";
 import goods from "./modules/goods"
 
 new Store({

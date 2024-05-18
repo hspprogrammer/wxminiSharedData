@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "wxminishareddata": "^2.0.0"
+    "wxminishareddata": "^2.0.1"
   }
 }
