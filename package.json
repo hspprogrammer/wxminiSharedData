@@ -1,6 +1,6 @@
 {
   "name": "wxminishareddata",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "微信小程序的全局状态管理方案",
   "main": "./lib/index.js",
   "scripts": {
