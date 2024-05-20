@@ -1,8 +1,10 @@
 const path = require("path");
 const pkg = require("./package.json");
+const isProduction = process.env.NODE_ENV === "production";
 
 module.exports = {
-  mode: "production",
+  mode: process.env.NODE_ENV,
+  devtool: isProduction ? false : "cheap-source-map",
   experiments: {
     outputModule: true,
   },

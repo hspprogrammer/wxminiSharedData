@@ -1,7 +1,4 @@
-# wxminishareddata
-
-[![NPM version](https://img.shields.io/npm/v/wxminishareddata.svg)](https://www.npmjs.com/package/wxminishareddata)
-[![License](https://img.shields.io/npm/l/wxminishareddata.svg)](https://www.npmjs.com/package/wxminishareddata)
+# wxminishareddata [![NPM version](https://img.shields.io/npm/v/wxminishareddata.svg)](https://www.npmjs.com/package/wxminishareddata) [![License](https://img.shields.io/npm/l/wxminishareddata.svg)](https://www.npmjs.com/package/wxminishareddata)
 
 一个基于原生小程序的 mini 轻量全局状态管理库，跨页面/组件数据共享渲染。
 
@@ -156,11 +153,16 @@ this.$effect(
         fn();
       }, 1000);
     },
+    lazy: true,
   }
 );
 ```
 
-effect 函数有两个参数,第一个参数是一个回调函数，第二个函数是一个对象，可传入 scheduler，用于自己控制 effect 函数的执行。
+effect 函数有两个参数,第一个参数是一个回调函数，第二个函数是一个 options 对象，可传入 scheduler，用于自己控制 effect 函数的执行。
+| options 属性 | 类型 | 描述 |
+| :----- | :------: | -----: |
+| scheduler | Function | 入参 fn 是当前 effect 的回调函数 |
+| lazy | Boolean | 是否延迟到页面的 onShow 执行，默认是 true,建议使用默认值，如果在 app.js 中使用，建议设置为 false |
 
 #### <div id="api-3">storeCommit</div>
 
@@ -204,9 +206,13 @@ console.log(this.$storeGetters("getAppName"));
 
 ## <div id="log">更新日志</div>
 
+### 2.1.0
+
+\[2024.5.20\] : 修复若干 bug，优化 effect 执行时机，只在当前页面执行，其他页面缓存到 onShow 中执行。
+
 ### 2.0.0
 
-\[2024.5.13\] : 引入响应式，支持 getter 缓存,模块化配置
+\[2024.5.18\] : 引入响应式，支持 getter 缓存,模块化配置
 
 ### 1.0.0
 

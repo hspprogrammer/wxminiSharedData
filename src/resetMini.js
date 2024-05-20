@@ -1,15 +1,5 @@
-import {
-  setStoreToPage,
-  storeCommit,
-  storeDispatch,
-  destroyFn,
-  getStoreData,
-  storeGetters
-} from "./store"
-import {
-  effect,
-  destroyDep
-} from "./responsive";
+import { setStoreToPage, storeCommit, storeDispatch, destroyFn, getStoreData, storeGetters } from "./store";
+import { effect, destroyDep, onShowEffectRun } from "./responsive";
 
 function reSetPage() {
   // @ts-ignore
@@ -22,25 +12,31 @@ function reSetPage() {
     options["$getStoreData"] = getStoreData;
     options["$storeGetters"] = storeGetters;
 
-    if (!options['onLoad']) options['onLoad'] = function () {};
+    if (!options["onLoad"]) options["onLoad"] = function () {};
+    if (!options["onShow"]) options["onShow"] = function () {};
 
-    const cOnLoad = options['onLoad'];
-    options['onLoad'] = function () {
+    const cOnLoad = options["onLoad"];
+    options["onLoad"] = function () {
       this.$storeData = getStoreData();
       return cOnLoad.apply(this, [...arguments]);
-    }
+    };
 
+    const cOnShow = options["onShow"];
+    options["onShow"] = function () {
+      onShowEffectRun();
+      return cOnShow.apply(this, [...arguments]);
+    };
 
-    if (!options['onUnload']) options['onUnload'] = function () {};
+    if (!options["onUnload"]) options["onUnload"] = function () {};
 
-    const cOnUnload = options['onUnload'];
-    options['onUnload'] = function () {
+    const cOnUnload = options["onUnload"];
+    options["onUnload"] = function () {
       destroyFn.call(this);
       destroyDep.call(this);
       return cOnUnload.apply(this, [...arguments]);
-    }
+    };
     cPage(options);
-  }
+  };
 }
 
 function reSetComponents(StoreData) {
@@ -51,20 +47,21 @@ function reSetComponents(StoreData) {
     options["methods"]["$setStoreToPage"] = setStoreToPage;
     options["methods"]["$storeCommit"] = storeCommit;
     options["methods"]["$storeDispatch"] = storeDispatch;
-    options["$effect"] = effect;
-    options["$getStoreData"] = getStoreData;
+    options["methods"]["$effect"] = effect;
+    options["methods"]["$getStoreData"] = getStoreData;
+    options["methods"]["$storeGetters"] = storeGetters;
 
-    if (!options['detached']) options['detached'] = function () {};
+    if (!options["detached"]) options["detached"] = function () {};
 
-    const cDetached = options['detached'];
-    options['detached'] = function () {
+    const cDetached = options["detached"];
+    options["detached"] = function () {
       destroyFn.call(this);
       destroyDep.call(this);
       return cDetached.apply(this, [...arguments]);
-    }
+    };
 
     cComponent(options);
-  }
+  };
 }
 
 reSetPage();
