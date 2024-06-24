@@ -206,6 +206,10 @@ console.log(this.$storeGetters("getAppName"));
 
 ## <div id="log">更新日志</div>
 
+### 2.1.1
+
+\[2024.6.24\] : 修复 currentpage 获取错误，导致 effect lazy 执行无效。
+
 ### 2.1.0
 
 \[2024.5.20\] : 修复若干 bug，优化 effect 执行时机，只在当前页面执行，其他页面缓存到 onShow 中执行。

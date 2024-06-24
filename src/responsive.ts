@@ -242,10 +242,12 @@ export function trigger(target: object, key: string | symbol, type: TriggerType,
     });
   }
   // @ts-ignore
-  const currentpage = getCurrentPages()[0];
+  const pageInstances = getCurrentPages();
+  const currentpage = pageInstances[pageInstances.length - 1];
   effectToRun &&
     effectToRun.forEach((effectFn) => {
       if (effectFn.options.lazy) {
+        // @ts-ignore
         if (effectFn.page === currentpage) {
           if (effectFn.options?.scheduler) {
             effectFn.options.scheduler(effectFn);
